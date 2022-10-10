@@ -3,6 +3,8 @@ const app = require('express').Router();
 const { validaCampos } = require('../middlewares/valida-campos');
 const Preguntas = require('../models/preguntas');
 const Encuesta = require('../models/encuesta');
+const Opcion = require('../models/opcion');
+
 
 
 
@@ -10,7 +12,7 @@ const Encuesta = require('../models/encuesta');
 
 app.post('/', validaCampos, async (req, res) => {
 
-    const { descripcion, idEncuesta } = req.body;
+    const { descripcion, idEncuesta, opciones } = req.body;
 
     const existeEncuesta = await Encuesta.findById(idEncuesta);
 
@@ -31,9 +33,20 @@ app.post('/', validaCampos, async (req, res) => {
 
         let preguntasDB = await preguntas.save();
 
-        let encuesta = await Encuesta.updateOne({_id:idEncuesta},{$push:{preguntas:preguntasDB._id}})
+        await Encuesta.updateOne({_id:idEncuesta},{$push:{preguntas:preguntasDB._id}})
 
-        console.log(encuesta)
+
+        for (let opcion of opciones){
+
+            let op = new Opcion({ descripcion:opcion.descripcion })
+
+            let opcionDB = await op.save()
+
+
+            await Preguntas.updateOne({_id:preguntasDB._id }, {$push:{opciones:opcionDB.id }})
+
+
+        }
 
        
 
@@ -44,7 +57,7 @@ app.post('/', validaCampos, async (req, res) => {
 
         return res.json({
             ok: true,
-            preguntasDB
+            data: preguntasDB
         })
 
     } catch (error) {

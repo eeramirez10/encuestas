@@ -10,10 +10,18 @@ const EncuestaSchema = mongoose.Schema({
         type:Date,
         default: Date.now
     },
+    descripcion:{
+        type:'string',
+        required:'true'
+    },
     preguntas:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Preguntas',
     
+    }],
+    usuarios:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Usuario',
     }]
 
 },{ collection:'encuestas'});

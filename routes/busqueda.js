@@ -3,6 +3,7 @@ const app = require('express').Router();
 
 const Encuesta = require('../models/encuesta');
 const Preguntas = require('../models/preguntas');
+const Usuario = require('../models/usuario');
 
 
 app.get('/coleccion/:tabla/:busqueda', async (req, res) => {
@@ -19,13 +20,32 @@ app.get('/coleccion/:tabla/:busqueda', async (req, res) => {
         switch(tabla){
             case 'encuestas':
                 data = await Encuesta.find()
-                    .populate('preguntas')
+                    .populate({
+                        path:'preguntas',
+                        populate:{ path:'opciones'}
+                    })
+                   
                     
-                            
-                           
             break;
             case 'preguntas':
-                data = await Preguntas.find({encuesta: '633cbd4f314b443c9b540049' })
+                data = await Preguntas.find()
+                        .populate('opciones')
+
+            case 'usuarios':
+
+                data= await Usuario.find()
+                    .populate({
+                        path:'encuestas.encuesta',
+                        select:'nombre'
+                    })
+                    .populate({
+                        path:'encuestas.preguntas.pregunta',
+                        select:'descripcion'
+                    })
+                    .populate({
+                        path:'encuestas.preguntas',
+                        populate:{ path:'respuesta', select:'descripcion'}
+                    })
                       
                     
                     

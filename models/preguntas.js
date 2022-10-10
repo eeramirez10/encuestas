@@ -11,6 +11,13 @@ const PreguntasSchema = mongoose.Schema({
     //     required:true
     // }
 
+    opciones:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:'Opcion',
+        }
+    ]
+
 },{ collection:'preguntas' });
 
 module.exports = mongoose.model('Preguntas', PreguntasSchema);

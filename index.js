@@ -1,4 +1,5 @@
 const express = require('express');
+require('dotenv').config();
 const app = express();
 const cors = require('cors');
 const { dbConnection } = require('./database/config');
@@ -18,7 +19,8 @@ dbConnection()
 app.use('/api/encuesta', require('./routes/encuesta'))
 app.use('/api/preguntas', require('./routes/preguntas'))
 app.use('/api/busqueda', require('./routes/busqueda'))
-
+app.use('/api/opcion', require('./routes/opcion'))
+app.use('/api/usuarios', require('./routes/usuarios'))
 
 
 
