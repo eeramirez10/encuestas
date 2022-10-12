@@ -28,9 +28,10 @@ app.get('/coleccion/:tabla/:busqueda', async (req, res) => {
                     
             break;
             case 'preguntas':
-                data = await Preguntas.find()
-                        .populate('opciones')
-
+                data = await Preguntas.find({})
+                    .populate('opciones')
+                        
+            break;
             case 'usuarios':
 
                 data= await Usuario.find()

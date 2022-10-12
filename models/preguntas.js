@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const PreguntasSchema = mongoose.Schema({
     descripcion:{
         type:String,
-        required:true
+        required:true,
+        unique:true
     },
     // encuesta:{
     //     type: mongoose.Schema.Types.ObjectId,

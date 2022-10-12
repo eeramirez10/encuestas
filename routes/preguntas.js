@@ -38,7 +38,7 @@ app.post('/', validaCampos, async (req, res) => {
 
         for (let opcion of opciones){
 
-            let op = new Opcion({ descripcion:opcion.descripcion })
+            let op = new Opcion({ descripcion:opcion.descripcion, type:opcion.type })
 
             let opcionDB = await op.save()
 

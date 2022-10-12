@@ -56,6 +56,33 @@ app.get('/:idUsuario', async (req,res)=>{
 
 })
 
+app.get('/', async (req,res)=>{
+
+    
+
+    try {
+        const usuario = await Usuario.find({})
+
+        
+
+        res.json({
+            ok:true,
+            usuarios: usuario
+        })
+        
+    } catch (error) {
+        console.log(error)
+
+        res.status(500).json({
+            ok:false,
+            msg:'Revisar logs'
+        })
+        
+    }
+
+
+})
+
 
 
 
