@@ -205,6 +205,8 @@ app.post('/enviar', async (req, res) => {
 
     const { encuesta, usuario } = req.body;
 
+    
+
     try {
 
         await transporter.sendMail({
