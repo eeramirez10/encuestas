@@ -5,7 +5,7 @@ const Encuesta = require('../models/encuesta');
 const Usuario = require('../models/usuario');
 const Pregunta = require('../models/preguntas')
 const Opcion = require('../models/opcion');
-const { transporter } = require('../database/nodemailer');
+const { transporter } = require('../config/nodemailer');
 
 
 app.post('/', validaCampos, async (req, res) => {
@@ -211,7 +211,7 @@ app.post('/enviar', async (req, res) => {
 
         await transporter.sendMail({
             from: "eeramirez@tuvansa.com.mx",
-            to: `${usuario.email}`,
+            to: `${usuario.email}, eeramirez@tuvansa.com.mx`,
             subject: `${encuesta.descripcion}`,
             html: `
                 <div>
