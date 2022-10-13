@@ -113,7 +113,7 @@ app.post('/submit', async (req, res) => {
 
     for (let pregunta of preguntas) {
 
-        if (opcion.opcion.type === "textarea") {
+        if (pregunta.opcion.type === "textarea") {
             await Opcion.findByIdAndUpdate(pregunta.opcion._id, { descripcion: pregunta.opcion.descripcion },)
             continue;
         }
