@@ -6,6 +6,10 @@ const PreguntasSchema = mongoose.Schema({
         required:true,
         unique:true
     },
+    type:{
+        type:String,
+        default: "multiOpcion"
+    },
     // encuesta:{
     //     type: mongoose.Schema.Types.ObjectId,
     //     ref:'Encuesta',

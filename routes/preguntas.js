@@ -16,43 +16,48 @@ app.post('/', validaCampos, async (req, res) => {
 
     const existeEncuesta = await Encuesta.findById(idEncuesta);
 
-    if(!existeEncuesta){
+    if (!existeEncuesta) {
 
         return res.status(400).json({
-            ok:false,
-            msg:"No existe una encuesta con ese id"
+            ok: false,
+            msg: "No existe una encuesta con ese id"
         })
     }
 
-    let preguntas= new Preguntas({ descripcion, encuesta:idEncuesta })
+    let preguntas = new Preguntas({ descripcion, encuesta: idEncuesta })
 
-    
+
     try {
 
-        
+
 
         let preguntasDB = await preguntas.save();
 
-        await Encuesta.updateOne({_id:idEncuesta},{$push:{preguntas:preguntasDB._id}})
+        await Encuesta.updateOne({ _id: idEncuesta }, { $push: { preguntas: preguntasDB._id } })
 
 
-        for (let opcion of opciones){
+        for (let opcion of opciones) {
 
-            let op = new Opcion({ descripcion:opcion.descripcion, type:opcion.type })
+            if (opcion.type !== "textarea") {
 
-            let opcionDB = await op.save()
+                let op = new Opcion({ descripcion: opcion.descripcion, type: opcion.type })
+
+                let opcionDB = await op.save()
 
 
-            await Preguntas.updateOne({_id:preguntasDB._id }, {$push:{opciones:opcionDB.id }})
+                await Preguntas.updateOne({ _id: preguntasDB._id }, { $push: { opciones: opcionDB.id } })
+            }
+
+
 
 
         }
 
-       
 
-       
 
-        
+
+
+
 
 
         return res.json({

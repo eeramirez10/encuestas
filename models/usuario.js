@@ -16,7 +16,8 @@ const UsuarioSchema = mongoose.Schema({
             _id:false,
             encuesta: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: 'Encuesta'
+                ref: 'Encuesta',
+                unique:true,
             },
             contestada: {
                 type: Boolean,

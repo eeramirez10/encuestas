@@ -6,6 +6,7 @@ const Usuario = require('../models/usuario');
 const Pregunta = require('../models/preguntas')
 const Opcion = require('../models/opcion');
 const { transporter } = require('../config/nodemailer');
+const { UserRefreshClient } = require('google-auth-library');
 
 
 app.post('/', validaCampos, async (req, res) => {
@@ -89,44 +90,104 @@ app.get('/:idEncuesta', async (req, res) => {
 
 app.post('/submit', async (req, res) => {
 
-    const { idEncuesta, idUsuario, preguntas } = req.body;
+    let { idEncuesta, idUsuario, preguntas } = req.body;
 
-    const preguntasM = preguntas.map(pregunta => ({
+
+    const comentarios = preguntas.filter( pregunta => pregunta.type === "comentario");
+
+    let multiOpciones = preguntas.filter( pregunta => pregunta.type === "multiOpcion");
+
+    // console.log({multiOpciones})
+
+    // return res.json({
+    //     ok: true,
+    //     msg: 'usuario'
+    // })
+
+    if( comentarios.length > 0){
+
+        for ( let pregunta of comentarios){
+
+            let op = new Opcion({ descripcion: pregunta.opcion.descripcion, type: pregunta.opcion.type })
+    
+            let opcionDB = await op.save()
+        
+        
+            await Pregunta.updateOne({ _id: pregunta._id, type: pregunta.type }, { $push: { opciones: opcionDB.id } }, { new: true})
+    
+           multiOpciones = [...multiOpciones,{
+                _id:pregunta._id,
+                opcion:{ 
+                   _id: opcionDB.id
+                }
+            }]
+    
+        }
+    
+
+    }
+
+
+
+
+    const preguntasM = multiOpciones.map(pregunta => ({
         pregunta: pregunta._id,
         respuesta: pregunta.opcion._id
-    }))
+    }));
 
     console.log(preguntasM)
-    console.log(preguntas)
 
-    const usuario = await Usuario.findByIdAndUpdate(idUsuario, {
-        $push: {
-            encuestas: {
-                encuesta: idEncuesta,
-                contestada: true,
-                preguntas: preguntasM
-            },
+    
+
+
+
+    let usuario = await Usuario.updateOne({ _id: idUsuario, "encuestas.encuesta": idEncuesta },
+        {
+            $set: {
+                encuestas: {
+                    encuesta: idEncuesta,
+                    contestada: true,
+                    preguntas: preguntasM
+                },
+            }
+
+        },
+        {
+            upsert: true
         }
-    }, { new: true })
+    )
+
+    usuario = await Usuario.findById(idUsuario)
+
+
+    // const usuario = await Usuario.findByIdAndUpdate(idUsuario, {
+    //     $push: {
+    //         encuestas: {
+    //             encuesta: idEncuesta,
+    //             contestada: true,
+    //             preguntas: preguntasM
+    //         },
+    //     }
+    // }, { new: true });
+
+
 
     const encuesta = await Encuesta.findById(idEncuesta);
 
     for (let pregunta of preguntas) {
 
-        if (pregunta.opcion.type === "textarea") {
-            await Opcion.findByIdAndUpdate(pregunta.opcion._id, { descripcion: pregunta.opcion.descripcion },)
-            continue;
-        }
+        if(pregunta.type === "comentario") continue;
 
-        await Opcion.findByIdAndUpdate(pregunta.opcion._id, { $inc: { valor: parseInt(pregunta.opcion.valor) } },)
-
+        await Opcion.findByIdAndUpdate(pregunta.opcion._id, { $inc: { valor: parseInt(pregunta.opcion.valor) } })
 
     }
+
+    console.log(usuario)
 
     await transporter.sendMail({
         from: "eeramirez@tuvansa.com.mx",
         to: `eeramirez@tuvansa.com.mx, gbarranco@tuvansa.com.mx`,
-        subject: `${encuesta.descripcion}`,
+        subject: `Encuesta contestada`,
         html: `
             <div>
 
@@ -159,6 +220,56 @@ app.post('/submit', async (req, res) => {
         })
     }
 
+
+})
+
+app.get('/user/answer/:idOpcion', async (req, res) => {
+
+    const { idEncuesta, idPregunta, idOpcion } = req.params;
+
+    console.log(idOpcion)
+
+    try {
+
+        const users = await Usuario.find(
+            {
+                encuestas: {
+                    $elemMatch: {
+                        // encuesta:"6346de8a6442ea3dcdc92532", 
+                        preguntas: {
+                            $elemMatch: {
+                                // pregunta:"6346e1b86442ea3dcdc92617", 
+                                respuesta: idOpcion
+                            }
+                        }
+                    }
+                }
+            }
+        )
+
+
+
+        const usuarios = users.map(user => ({ nombre: user.nombre, email: user.email, _id: user._id }));
+
+
+
+
+
+
+
+        return res.json({
+            ok: true,
+            usuarios: usuarios
+        })
+
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            ok: false,
+            msg: 'Hable con el administrador'
+        })
+    }
 
 })
 
@@ -205,7 +316,7 @@ app.post('/enviar', async (req, res) => {
 
     const { encuesta, usuario } = req.body;
 
-    
+
 
     try {
 
