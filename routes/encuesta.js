@@ -313,9 +313,23 @@ app.post('/asignar', async (req, res) => {
 
 app.post('/enviar', async (req, res) => {
 
-    const { encuesta, usuario } = req.body;
+    const { encuesta, usuario,  } = req.body;
 
+    // const usuariosDB = await Usuario.find({
+    //     encuestas:{
+    //         $elemMatch:{  encuesta: encuesta._id  }
+    //     }
+    // })
 
+    // const linksUsuarios = usuariosDB.map( usuario => (
+    //     {
+    //         nombre:usuario.nombre,
+    //         email:usuario.email,
+    //         link:`https://encuestas-app-6ec15.web.app/encuesta/start/${encuesta._id}/${usuario._id} `
+    //     }
+    // ))
+
+    // console.log(linksUsuarios)
 
     try {
 

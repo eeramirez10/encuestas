@@ -11,13 +11,23 @@ const UsuarioSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    area:{
+        type: String,
+        required: true
+    },
+    sucursal:{
+        type: String,
+        required: true
+    },
     encuestas: [
         {
             _id:false,
             encuesta: {
+                unique: false,
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'Encuesta',
-                unique:true,
+                
+                
             },
             contestada: {
                 type: Boolean,
@@ -33,6 +43,7 @@ const UsuarioSchema = mongoose.Schema({
                     pregunta: {
                         type: mongoose.Schema.Types.ObjectId,
                         ref: 'Preguntas',
+                        default: null,
                     },
                     
                     respuesta: {

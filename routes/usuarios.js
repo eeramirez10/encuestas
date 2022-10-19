@@ -4,10 +4,10 @@ const Usuario = require('../models/usuario');
 
 app.post('/', async (req,res) => {
 
-    const { nombre, email } = req.body;
+    const { nombre, email, area, sucursal } = req.body;
 
     try {
-        const usuario = new Usuario({nombre, email})
+        const usuario = new Usuario({ nombre, email, area, sucursal})
 
         const uausarioDB = await usuario.save()
 
