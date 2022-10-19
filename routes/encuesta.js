@@ -227,7 +227,6 @@ app.get('/user/answer/:idOpcion', async (req, res) => {
 
     const { idEncuesta, idPregunta, idOpcion } = req.params;
 
-    console.log(idOpcion)
 
     try {
 
@@ -330,7 +329,10 @@ app.post('/enviar', async (req, res) => {
                     Buen dia ${usuario.nombre}
                     <br>
                     <p> Favor de contestar la encuesta dando click al al enlace de abajo</p>
-                    <br>
+                    <p> El Objetivo de esta encuesta es encontrar areas de mejora en el funcionamiento de Tuvansa y en la satisfaccion de los profesionales que la componen. </p>
+                    <p>Sus respuestas son absolutamente confidenciales y serán enviadas directamente a la Dirección General de TUVANSA. </p>
+                    <p>Agradecemos su participación para esta evaluación.</p>
+                   
                     https://encuestas-app-6ec15.web.app/encuesta/start/${encuesta._id}/${usuario._id}
     
                 </div>
