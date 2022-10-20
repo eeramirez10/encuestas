@@ -184,20 +184,20 @@ app.post('/submit', async (req, res) => {
 
     console.log(usuario)
 
-    await transporter.sendMail({
-        from: "eeramirez@tuvansa.com.mx",
-        to: `eeramirez@tuvansa.com.mx, gbarranco@tuvansa.com.mx`,
-        subject: `Encuesta contestada`,
-        html: `
-            <div>
+    // await transporter.sendMail({
+    //     from: "eeramirez@tuvansa.com.mx",
+    //     to: `eeramirez@tuvansa.com.mx, gbarranco@tuvansa.com.mx`,
+    //     subject: `Encuesta contestada`,
+    //     html: `
+    //         <div>
 
-                El usuario ${usuario.nombre} ha contestado la encuesta  ${encuesta.nombre} 
+    //             El usuario ${usuario.nombre} ha contestado la encuesta  ${encuesta.nombre} 
         
 
-            </div>
+    //         </div>
             
-        `
-    })
+    //     `
+    // })
 
 
 
