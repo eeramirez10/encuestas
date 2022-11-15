@@ -1,5 +1,6 @@
 const app = require('express').Router();
 const { getAllUsuarios, createUsuario } = require('../controllers/usuariosController');
+const Usuario = require('../models/usuario');
 
 
 app.route('/')
