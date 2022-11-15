@@ -7,9 +7,6 @@ const Opcion = require('../models/opcion');
 
 
 
-
-
-
 app.post('/', validaCampos, async (req, res) => {
 
     const { descripcion, idEncuesta, opciones } = req.body;
@@ -73,6 +70,45 @@ app.post('/', validaCampos, async (req, res) => {
             msg: 'Hable con el administrador'
         })
     }
+
+
+})
+
+app.put('/', async (req, res) => {
+
+    const { opciones, ...pregunta } = req.body;
+
+    try {
+
+        const estaPregunta = await Preguntas.findByIdAndUpdate(pregunta._id, pregunta);
+
+        for (let opcion of opciones){
+            let estaOpcion = await Opcion.findByIdAndUpdate(opcion._id, { descripcion: opcion.descripcion});
+
+            
+        }
+
+
+        return res.json({
+            ok: true,
+            msg: "actualizado correctamente"
+
+        })
+
+
+    } catch (error) {
+
+        console.log(error);
+         return res.json({
+            ok:false,
+            msg:"Hubo un errror"
+         })
+
+    }
+
+
+
+
 
 
 })
