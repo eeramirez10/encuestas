@@ -9,10 +9,20 @@ const options = {
 
 const getAllUsuarios = async (req, res) => {
 
-    try {
-        const usuario = await Usuario.paginate({}, options)
+    const {search} = req.query
 
-        console.log(usuario)
+    const RegxSearch = new RegExp(search, "i")
+
+    try {
+        const usuario = await Usuario.paginate({ 
+            $or:[
+                {nombre:{  $regex: RegxSearch  }},
+                {email:{  $regex: RegxSearch  }}
+            ]
+
+         }, options)
+
+       
 
         res.json({
             ok: true,

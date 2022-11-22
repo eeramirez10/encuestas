@@ -6,7 +6,7 @@ const Usuario = require('../models/usuario');
 const Pregunta = require('../models/preguntas')
 const Opcion = require('../models/opcion');
 const { transporter } = require('../config/nodemailer');
-const { UserRefreshClient } = require('google-auth-library');
+
 
 
 app.post('/', validaCampos, async (req, res) => {
@@ -92,10 +92,14 @@ app.post('/submit', async (req, res) => {
 
     let { idEncuesta, idUsuario, preguntas } = req.body;
 
+    // console.log({ idEncuesta, idUsuario, preguntas })
 
-    const comentarios = preguntas.filter( pregunta => pregunta.type === "comentario");
 
-    let multiOpciones = preguntas.filter( pregunta => pregunta.type === "multiOpcion");
+    const comentarios = preguntas.filter(pregunta => pregunta.type === "comentario");
+
+    let multiOpciones = preguntas.filter(pregunta => pregunta.type === "multiOpcion");
+
+
 
     // console.log({multiOpciones})
 
@@ -104,26 +108,26 @@ app.post('/submit', async (req, res) => {
     //     msg: 'usuario'
     // })
 
-    if( comentarios.length > 0){
+    if (comentarios.length > 0) {
 
-        for ( let pregunta of comentarios){
+        for (let pregunta of comentarios) {
 
             let op = new Opcion({ descripcion: pregunta.opcion.descripcion, type: pregunta.opcion.type })
-    
+
             let opcionDB = await op.save()
-        
-        
-            await Pregunta.updateOne({ _id: pregunta._id, type: pregunta.type }, { $push: { opciones: opcionDB.id } }, { new: true})
-    
-           multiOpciones = [...multiOpciones,{
-                _id:pregunta._id,
-                opcion:{ 
-                   _id: opcionDB.id
+
+
+            await Pregunta.updateOne({ _id: pregunta._id, type: pregunta.type }, { $push: { opciones: opcionDB.id } }, { new: true })
+
+            multiOpciones = [...multiOpciones, {
+                _id: pregunta._id,
+                opcion: {
+                    _id: opcionDB.id
                 }
             }]
-    
+
         }
-    
+
 
     }
 
@@ -135,20 +139,26 @@ app.post('/submit', async (req, res) => {
         respuesta: pregunta.opcion._id
     }));
 
+  
     console.log(preguntasM)
 
-    
 
 
 
     let usuario = await Usuario.updateOne({ _id: idUsuario, "encuestas.encuesta": idEncuesta },
         {
             $set: {
-                encuestas: {
-                    encuesta: idEncuesta,
-                    contestada: true,
-                    preguntas: preguntasM
-                },
+                // "encuestas.$": {
+                //     encuesta: idEncuesta,
+                //     contestada: true,
+                //     preguntas: preguntasM
+                // },
+
+                "encuestas.$.contestada": true,
+                "encuestas.$.preguntas": preguntasM,
+                "encuestas.$.encuesta": idEncuesta,
+                "encuestas.$.dateContestada": new Date(),
+
             }
 
         },
@@ -176,13 +186,13 @@ app.post('/submit', async (req, res) => {
 
     for (let pregunta of preguntas) {
 
-        if(pregunta.type === "comentario") continue;
+        if (pregunta.type === "comentario") continue;
 
         await Opcion.findByIdAndUpdate(pregunta.opcion._id, { $inc: { valor: parseInt(pregunta.opcion.valor) } })
 
     }
 
-    console.log(usuario)
+   
 
     // await transporter.sendMail({
     //     from: "eeramirez@tuvansa.com.mx",
@@ -192,10 +202,10 @@ app.post('/submit', async (req, res) => {
     //         <div>
 
     //             El usuario ${usuario.nombre} ha contestado la encuesta  ${encuesta.nombre} 
-        
+
 
     //         </div>
-            
+
     //     `
     // })
 
@@ -222,6 +232,108 @@ app.post('/submit', async (req, res) => {
 
 
 })
+
+app.post('/reset/:idEncuesta', async (req, res) => {
+
+    const { idEncuesta } = req.params;
+
+    try {
+
+        const encuestaDB = await Encuesta.findById(idEncuesta);
+
+        for (let pregunta of encuestaDB.preguntas) {
+
+            const preguntasDB = await Pregunta.findById(pregunta);
+
+            for (let opciones of preguntasDB.opciones) {
+                const opcionesDB = await Opcion.findByIdAndUpdate(opciones, { valor: 0 });
+
+
+            }
+        }
+
+
+        return res.json({
+            ok: true,
+            msg:"Encuesta reset correctamente"
+        })
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.json({
+            ok:false,
+            msg:"Hubo un error"
+        })
+
+    }
+
+
+
+
+});
+
+
+app.get('/ajustar/:idEncuesta', async (req, res) =>{
+
+    const { idEncuesta } = req.params;
+
+    const encuestaDB = await Encuesta.findById(idEncuesta);
+
+    for(let pregunta of encuestaDB.preguntas){
+        const preguntasDB = await Pregunta.findById(pregunta._id);
+
+        for( let opcion of preguntasDB.opciones ){
+
+            const opcionDB = await Opcion.findById(opcion._id);
+
+       
+
+            if(!opcionDB){
+
+                console.log(opcion)
+                console.log(opcion.length)
+
+                
+            }
+
+            // console.log(opcionDB)
+
+            const users = await Usuario.find(
+                {
+                    encuestas: {
+                        $elemMatch: {
+                            // encuesta:"6346de8a6442ea3dcdc92532", 
+                            preguntas: {
+                                $elemMatch: {
+                                    // pregunta:"6346e1b86442ea3dcdc92617", 
+                                    respuesta: opcionDB
+                                }
+                            }
+                        }
+                    }
+                }
+            )
+
+            await Opcion.findByIdAndUpdate(opcionDB, { valor: users.length })
+        }
+    }
+
+    
+
+    
+
+    res.json({
+        ok:true,
+        encuestaDB
+    })
+
+
+
+
+})
+
 
 app.get('/user/answer/:idOpcion', async (req, res) => {
 
@@ -313,7 +425,7 @@ app.post('/asignar', async (req, res) => {
 
 app.post('/enviar', async (req, res) => {
 
-    const { encuesta, usuario,  } = req.body;
+    const { encuesta, usuario, } = req.body;
 
     // const usuariosDB = await Usuario.find({
     //     encuestas:{
@@ -377,3 +489,4 @@ app.post('/enviar', async (req, res) => {
 
 
 module.exports = app;
+
