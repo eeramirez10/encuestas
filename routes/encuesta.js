@@ -94,6 +94,8 @@ app.post('/submit', async (req, res) => {
 
     // console.log({ idEncuesta, idUsuario, preguntas })
 
+    console.log(preguntas)
+
 
     const comentarios = preguntas.filter(pregunta => pregunta.type === "comentario");
 
@@ -108,16 +110,34 @@ app.post('/submit', async (req, res) => {
     //     msg: 'usuario'
     // })
 
+
+
     if (comentarios.length > 0) {
 
         for (let pregunta of comentarios) {
 
-            let op = new Opcion({ descripcion: pregunta.opcion.descripcion, type: pregunta.opcion.type })
+            let op = new Opcion({
+                descripcion: pregunta.opcion.descripcion,
+                type: pregunta.opcion.type,
+                pregunta: pregunta._id,
+                encuesta: idEncuesta
+            })
 
             let opcionDB = await op.save()
 
 
-            await Pregunta.updateOne({ _id: pregunta._id, type: pregunta.type }, { $push: { opciones: opcionDB.id } }, { new: true })
+            await Pregunta.updateOne(
+                {
+                    _id: pregunta._id,
+                    type: pregunta.type
+                },
+                {
+                    $push: { opciones: opcionDB.id }
+                },
+                {
+                    new: true
+                }
+            )
 
             multiOpciones = [...multiOpciones, {
                 _id: pregunta._id,
@@ -139,8 +159,8 @@ app.post('/submit', async (req, res) => {
         respuesta: pregunta.opcion._id
     }));
 
-  
-    console.log(preguntasM)
+
+
 
 
 
@@ -192,7 +212,7 @@ app.post('/submit', async (req, res) => {
 
     }
 
-   
+
 
     // await transporter.sendMail({
     //     from: "eeramirez@tuvansa.com.mx",
@@ -255,7 +275,7 @@ app.post('/reset/:idEncuesta', async (req, res) => {
 
         return res.json({
             ok: true,
-            msg:"Encuesta reset correctamente"
+            msg: "Encuesta reset correctamente"
         })
 
     } catch (error) {
@@ -263,8 +283,8 @@ app.post('/reset/:idEncuesta', async (req, res) => {
         console.log(error);
 
         res.json({
-            ok:false,
-            msg:"Hubo un error"
+            ok: false,
+            msg: "Hubo un error"
         })
 
     }
@@ -275,27 +295,27 @@ app.post('/reset/:idEncuesta', async (req, res) => {
 });
 
 
-app.get('/ajustar/:idEncuesta', async (req, res) =>{
+app.get('/ajustar/:idEncuesta', async (req, res) => {
 
     const { idEncuesta } = req.params;
 
     const encuestaDB = await Encuesta.findById(idEncuesta);
 
-    for(let pregunta of encuestaDB.preguntas){
+    for (let pregunta of encuestaDB.preguntas) {
         const preguntasDB = await Pregunta.findById(pregunta._id);
 
-        for( let opcion of preguntasDB.opciones ){
+        for (let opcion of preguntasDB.opciones) {
 
             const opcionDB = await Opcion.findById(opcion._id);
 
-       
 
-            if(!opcionDB){
+
+            if (!opcionDB) {
 
                 console.log(opcion)
                 console.log(opcion.length)
 
-                
+
             }
 
             // console.log(opcionDB)
@@ -320,18 +340,52 @@ app.get('/ajustar/:idEncuesta', async (req, res) =>{
         }
     }
 
-    
 
-    
+
+
 
     res.json({
-        ok:true,
+        ok: true,
         encuestaDB
     })
 
 
 
 
+})
+
+
+app.delete('/:idEncuesta', async (req, res) => {
+
+    const { idEncuesta } = req.params;
+
+    await Encuesta.findByIdAndRemove(idEncuesta);
+
+    const preguntasDB = await Pregunta.find({ encuesta: idEncuesta });
+
+    if (preguntasDB) {
+
+        for (let pregunta of preguntasDB) {
+
+            await Pregunta.findByIdAndDelete(pregunta._id)
+        }
+
+    }
+
+    const opcionesDB = await Opcion.find({ encuesta: idEncuesta });
+
+    if (opcionesDB) {
+
+        for (let opcion of opcionesDB) {
+            await Opcion.findByIdAndDelete(opcion._id)
+        }
+    }
+
+
+    res.json({
+        ok: true,
+        msg: 'eliminado'
+    })
 })
 
 

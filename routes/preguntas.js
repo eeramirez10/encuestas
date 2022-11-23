@@ -21,32 +21,36 @@ app.post('/', validaCampos, async (req, res) => {
         })
     }
 
-    let preguntas = new Preguntas({ descripcion:pregunta.descripcion, type:pregunta.type, encuesta: idEncuesta })
+       let preguntaDB = new Preguntas({
+        descripcion: pregunta.descripcion,
+        type: pregunta.type,
+        encuesta: idEncuesta
+    })
 
 
     try {
 
+        preguntaDB = await preguntaDB.save();
 
-
-        let preguntasDB = await preguntas.save();
-
-        await Encuesta.updateOne({ _id: idEncuesta }, { $push: { preguntas: preguntasDB._id } })
+        await Encuesta.findByIdAndUpdate(idEncuesta, { $push: { preguntas: preguntaDB._id } })
 
 
         for (let opcion of opciones) {
 
-            if (opcion.type !== "textarea") {
-
-                let op = new Opcion({ descripcion: opcion.descripcion, type: opcion.type })
-
-                let opcionDB = await op.save()
+            if (opcion.type === "textarea") continue;
 
 
-                await Preguntas.updateOne({ _id: preguntasDB._id }, { $push: { opciones: opcionDB.id } })
-            }
+            let op = new Opcion({
+                descripcion: opcion.descripcion,
+                type: opcion.type,
+                encuesta: idEncuesta,
+                pregunta: preguntaDB._id
+            });
+
+            let opcionDB = await op.save();
 
 
-
+            await Preguntas.findByIdAndUpdate(preguntaDB._id, { $push: { opciones: opcionDB.id } })
 
         }
 
@@ -59,7 +63,7 @@ app.post('/', validaCampos, async (req, res) => {
 
         return res.json({
             ok: true,
-            data: preguntasDB
+            data: preguntaDB
         })
 
     } catch (error) {
@@ -82,10 +86,10 @@ app.put('/', async (req, res) => {
 
         const estaPregunta = await Preguntas.findByIdAndUpdate(pregunta._id, pregunta);
 
-        for (let opcion of opciones){
-            let estaOpcion = await Opcion.findByIdAndUpdate(opcion._id, { descripcion: opcion.descripcion});
+        for (let opcion of opciones) {
+            let estaOpcion = await Opcion.findByIdAndUpdate(opcion._id, { descripcion: opcion.descripcion });
 
-            
+
         }
 
 
@@ -99,10 +103,10 @@ app.put('/', async (req, res) => {
     } catch (error) {
 
         console.log(error);
-         return res.json({
-            ok:false,
-            msg:"Hubo un errror"
-         })
+        return res.json({
+            ok: false,
+            msg: "Hubo un errror"
+        })
 
     }
 
@@ -114,16 +118,16 @@ app.put('/', async (req, res) => {
 })
 
 app.put('/addIdEncuesta/:idEncuesta', async (req, res) => {
-    const {idEncuesta} = req.params;
+    const { idEncuesta } = req.params;
 
-   const resp = await Preguntas.updateMany({},{ encuesta:idEncuesta  });
+    const resp = await Preguntas.updateMany({}, { encuesta: idEncuesta });
 
-   console.log(resp)
+    console.log(resp)
 
 
     res.json({
-        ok:true,
-        msg:"addIdEncueasta"
+        ok: true,
+        msg: "addIdEncueasta"
     })
 
 })
