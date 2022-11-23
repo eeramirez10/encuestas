@@ -3,6 +3,7 @@ const app = require('express').Router();
 const { validaCampos } = require('../middlewares/valida-campos');
 const Pregunta = require('../models/preguntas')
 const Opcion = require('../models/opcion');
+const Encuesta = require('../models/encuesta');
 
 
 app.post('/', validaCampos, async (req, res) => {
@@ -72,6 +73,32 @@ app.put('/', async (req,res)  =>{
     })
 
 })
+
+
+app.put('/addIdPreguntaEncuesta/:idEncuesta',async (req,res) =>{
+    const {idEncuesta} = req.params;
+
+    const encuestaDB = await Encuesta.findById(idEncuesta);
+
+    for( let pregunta of encuestaDB.preguntas){
+
+        let preguntaDB = await Pregunta.findById(pregunta);
+
+        console.log(preguntaDB)
+
+        for(let opcion of preguntaDB.opciones){
+
+            await Opcion.findByIdAndUpdate(opcion,{ encuesta: idEncuesta, pregunta: preguntaDB._id} )
+        }
+
+    }
+
+    res.json({
+        ok:true,
+        msg:"addIdPreguntaEncuesta"
+    })
+
+} )
 
 
 

@@ -12,7 +12,17 @@ const OpcionSchema = mongoose.Schema({
     type:{
         type: String,
 
-    }
+    },
+    encuesta:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:'Encuesta',
+        required:true
+    },
+    pregunta:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:'Preguntas',
+        required:true
+    },
 },{ collection:'opciones'});
 
 module.exports = mongoose.model('Opcion',OpcionSchema )

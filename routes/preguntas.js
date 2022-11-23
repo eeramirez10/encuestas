@@ -9,7 +9,7 @@ const Opcion = require('../models/opcion');
 
 app.post('/', validaCampos, async (req, res) => {
 
-    const { descripcion, idEncuesta, opciones } = req.body;
+    const { pregunta, idEncuesta, opciones } = req.body;
 
     const existeEncuesta = await Encuesta.findById(idEncuesta);
 
@@ -21,7 +21,7 @@ app.post('/', validaCampos, async (req, res) => {
         })
     }
 
-    let preguntas = new Preguntas({ descripcion, encuesta: idEncuesta })
+    let preguntas = new Preguntas({ descripcion:pregunta.descripcion, type:pregunta.type, encuesta: idEncuesta })
 
 
     try {
@@ -110,6 +110,21 @@ app.put('/', async (req, res) => {
 
 
 
+
+})
+
+app.put('/addIdEncuesta/:idEncuesta', async (req, res) => {
+    const {idEncuesta} = req.params;
+
+   const resp = await Preguntas.updateMany({},{ encuesta:idEncuesta  });
+
+   console.log(resp)
+
+
+    res.json({
+        ok:true,
+        msg:"addIdEncueasta"
+    })
 
 })
 

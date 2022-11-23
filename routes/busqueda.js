@@ -30,6 +30,7 @@ app.get('/coleccion/:tabla/:busqueda', async (req, res) => {
             case 'preguntas':
                 data = await Preguntas.find({})
                     .populate('opciones')
+                    .populate('encuesta', 'nombre')
                         
             break;
             case 'usuarios':
