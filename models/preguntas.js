@@ -22,6 +22,6 @@ const PreguntasSchema = mongoose.Schema({
         }
     ]
 
-},{ collection:'preguntas' });
+},{ collection:'preguntas', timestamps:true });
 
 module.exports = mongoose.model('Preguntas', PreguntasSchema);

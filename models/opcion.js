@@ -23,7 +23,7 @@ const OpcionSchema = mongoose.Schema({
         ref:'Preguntas',
         required:true
     },
-},{ collection:'opciones'});
+},{ collection:'opciones', timestamps:true});
 
 module.exports = mongoose.model('Opcion',OpcionSchema )
 

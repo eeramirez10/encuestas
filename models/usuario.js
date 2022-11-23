@@ -56,7 +56,7 @@ const UsuarioSchema = mongoose.Schema({
         }
     ]
 
-}, { collection: 'usuarios' });
+}, { collection: 'usuarios', timestamps:true });
 
 UsuarioSchema.plugin(paginate)
 

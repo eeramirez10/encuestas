@@ -24,6 +24,6 @@ const EncuestaSchema = mongoose.Schema({
         ref:'Usuario',
     }]
 
-},{ collection:'encuestas'});
+},{ collection:'encuestas', timestamps:true});
 
 module.exports = mongoose.model('Encuesta', EncuestaSchema);
