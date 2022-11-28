@@ -3,13 +3,14 @@ const Usuario = require('../models/usuario');
 
 const options = {
     page:1,
-    limit: 100,
+    limit: 50,
 }
 
 
 const getAllUsuarios = async (req, res) => {
 
-    const {search} = req.query
+    const { search, page } = req.query;
+
 
     const RegxSearch = new RegExp(search, "i")
 
@@ -20,13 +21,16 @@ const getAllUsuarios = async (req, res) => {
                 {email:{  $regex: RegxSearch  }}
             ]
 
-         }, options)
+         }, {
+            page,
+            limit:10
+         })
 
        
 
         res.json({
             ok: true,
-            usuarios: usuario
+            data: usuario
         })
 
     } catch (error) {
