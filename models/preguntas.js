@@ -4,7 +4,7 @@ const PreguntasSchema = mongoose.Schema({
     descripcion:{
         type:String,
         required:true,
-        unique:true
+        unique:false
     },
     type:{
         type:String,
