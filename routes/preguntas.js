@@ -21,7 +21,7 @@ app.post('/', validaCampos, async (req, res) => {
         })
     }
 
-       let preguntaDB = new Preguntas({
+    let preguntaDB = new Preguntas({
         descripcion: pregunta.descripcion,
         type: pregunta.type,
         encuesta: idEncuesta
@@ -84,10 +84,31 @@ app.put('/', async (req, res) => {
 
     try {
 
-        const estaPregunta = await Preguntas.findByIdAndUpdate(pregunta._id, pregunta);
+        const preguntaDB = await Preguntas.findByIdAndUpdate(pregunta._id, pregunta);
 
         for (let opcion of opciones) {
             let estaOpcion = await Opcion.findByIdAndUpdate(opcion._id, { descripcion: opcion.descripcion });
+
+            if (!estaOpcion) {
+
+                if (opcion.type === "textarea") continue;
+
+
+                let op = new Opcion({
+                    descripcion: opcion.descripcion,
+                    type: opcion.type,
+                    encuesta: preguntaDB.encuesta,
+                    pregunta: preguntaDB._id
+                });
+
+                let opcionDB = await op.save();
+
+
+                await Preguntas.findByIdAndUpdate(preguntaDB._id, { $push: { opciones: opcionDB.id } })
+
+
+
+            }
 
 
         }
