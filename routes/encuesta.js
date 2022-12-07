@@ -414,7 +414,15 @@ app.get('/user/answer/:idOpcion', async (req, res) => {
 
 
 
-        const usuarios = users.map(user => ({ nombre: user.nombre, email: user.email, _id: user._id }));
+
+
+        const usuarios = users.map(user => ({
+            nombre: user.nombre,
+            email: user.email,
+            sucursal: user.sucursal,
+            area:user.area,
+            _id: user._id
+        }));
 
 
 
